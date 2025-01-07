@@ -25,12 +25,12 @@ npm install
 
 ## Creating your plugin
 
-Your plugin code is in `src/plugin.js`. To understand more about KAPLAY plugins, 
+Your plugin code is in `src/plugin.ts`. To understand more about KAPLAY plugins, 
 [read this guide](https://kaplayjs.com/guides/plugins/).
 
 ## Testing and building
 
-`test/game.js` file imports your plugin that you can test with a KAPLAY game. 
+`test/game.ts` file imports your plugin that you can test with a KAPLAY game. 
 You can then build your masterpiece with:
 
 ```sh
