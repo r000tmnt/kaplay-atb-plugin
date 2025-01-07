@@ -29,7 +29,7 @@ Your plugin code is in `src/plugin.js`. To understand more about KAPLAY plugins,
 
 ## Testing and building
 
-test/game.js file imports your plugin that you can test with a KAPLAY game. 
+`test/game.js` file imports your plugin that you can test with a KAPLAY game. 
 You can then build your masterpiece with:
 
 ```sh
