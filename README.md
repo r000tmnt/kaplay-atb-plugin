@@ -3,8 +3,9 @@
 A minimal and clean [**KAPLAY.js**](https://kaplayjs.com) plugin template for 
 creating and publishing plugins.
 
-> If you're reading the `kaplay-hi-plugin-ts` on NPM, this is only a demo plugin,
-> it will add a `hi()` function to log `hi`.
+> If you're reading the `kaplay-hi-plugin-ts` on NPM, this is a demo plugin that adds
+> a `hi()` function to log "hi". If you want to create your plugin, 
+> [check the template](https://github.com/kaplayjs/kaplay-plugin-template-ts).
 
 ## Download template
 
@@ -12,13 +13,13 @@ You can download the template using **"Download ZIP"** option in **GitHub**,
 you can also use git:
 
 ```sh
-git clone https://github.com/kaplayjs/kaplay-plugin-template
+git clone https://github.com/kaplayjs/kaplay-plugin-template-ts
 ```
 
 Navigate to the folder and install dependencies:
 
 ```sh
-cd kaplay-plugin-template
+cd kaplay-plugin-template-ts
 npm install
 ```
 
