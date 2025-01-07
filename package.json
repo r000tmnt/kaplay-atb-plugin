@@ -9,7 +9,8 @@
   "exports": {
     ".": {
       "import": "./dist/plugin.js",
-      "require": "./dist/plugin.umd.cjs"
+      "require": "./dist/plugin.umd.cjs",
+      "types": "./dist/plugin.d.ts"
     }
   },
   "scripts": {
@@ -17,6 +18,10 @@
     "build": "vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "keywords": [],
   "author": "",
   "license": "MIT",
