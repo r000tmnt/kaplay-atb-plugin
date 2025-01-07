@@ -9,14 +9,14 @@ creating and publishing plugins.
 
 ## Download template
 
-You can download the template using **"Download ZIP"** option in **GitHub**,
-you can also use git:
+You can download the template using **"Download ZIP"** option in **GitHub** or 
+by using `git clone`:
 
 ```sh
 git clone https://github.com/kaplayjs/kaplay-plugin-template-ts
 ```
 
-Navigate to the folder and install dependencies:
+Then navigate to the template folder and install dependencies:
 
 ```sh
 cd kaplay-plugin-template-ts
