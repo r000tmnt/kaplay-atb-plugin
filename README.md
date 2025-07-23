@@ -10,7 +10,7 @@ npm i kaplay-atb-plugin
 Import the plugin into your kaplay game.
 ```
 import kaplay from "kaplay";
-import ATB from "../src/plugin";
+import ATB from 'kaplay-atb-plugin'
 
 const k = kaplay({
     width: 800,
