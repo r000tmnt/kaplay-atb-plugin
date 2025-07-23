@@ -13,10 +13,14 @@ const atb = k.createATB(
     20, 
     { x: 100, y: 100 }, 
     () => { console.log("ATB filled!") },
-    null,
-    null,
-    true
+    {
+        stay: true
+    }
 );
+
+atb.bar.add([
+    k.text('Flexible ATB', { size: 16, font: "monospace" }),
+])
 
 const pauseBtn = k.add([
     k.rect(100, 50),

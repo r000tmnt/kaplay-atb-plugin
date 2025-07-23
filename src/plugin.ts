@@ -8,6 +8,22 @@ export interface ATBBar {
     remove: Function;
 }
 
+/**
+ * @param wrapperColor - Optional color for the wrapper of the ATB bar in rgb format
+ * @param barColor - Optional color for the ATB bar in rgb format
+ * @param radious - Optional radius for the corners of the ATB bar
+ * @param outline - If true, the bar will have an outline
+ * @param reverse - If true, the bar will go in reverse order (from right to left)
+ */
+interface ATBPOptions{
+    wrapperColor?: number[];
+    barColor?: number[];
+    radious?: number;
+    outline?: number;
+    reverse?: boolean;
+    stay?: boolean;
+}
+
 export default function ATB(k: KAPLAYCtx) {
 
     return {
@@ -18,9 +34,13 @@ export default function ATB(k: KAPLAYCtx) {
          * @param height - Height of the ATB bar
          * @param pos - Position of the ATB bar in the game world
          * @param action - Function to call when the ATB bar is filled
-         * @param wrapperColor - Optional color for the wrapper of the ATB bar in rgb format
-         * @param barColor - Optional color for the ATB bar in rgb format
-         * @param reverse - If true, the bar will go in reverse order (from right to left)
+         * @param options - Optional parameters for customizing the ATB bar
+         * @param options.wrapperColor - Color of the wrapper in rgb format (default: [0, 0, 0])
+         * @param options.barColor - Color of the ATB bar in rgb format (default: [10, 130, 180])
+         * @param options.radious - Radius for the corners of the ATB bar (default: null)
+         * @param options.outline - If true, the bar will have an outline (default  : null) 
+         * @param options.reverse - If true, the bar will fill in reverse order (default: false)
+         * @param options.stay - If true, the bar will stay on the screen after filling (default: false)
          * @returns - An object containing the wrapper, bar, and controller for the ATB bar
          */
         createATB(
@@ -29,17 +49,18 @@ export default function ATB(k: KAPLAYCtx) {
             height: number, 
             pos: { x: number, y: number },
             action: Function,
-            wrapperColor: number[] | null = null,
-            barColor: number[] | null = null,
-            reverse: boolean = false
+            options: ATBPOptions = {}
         ) {
+            const { wrapperColor, barColor, radious, outline, reverse, stay } = options;
+
             let wColor = wrapperColor ? wrapperColor : [0, 0, 0];
             let bColor = barColor ? barColor : [10, 130, 180];
 
             const wrapper = k.add([
                 k.rect(width, height),
                 k.pos(pos.x, pos.y),       
-                (reverse)? k.color(bColor[0], bColor[1], bColor[2]) : k.color(wColor[0], wColor[1], wColor[2])                       
+                (reverse)? k.color(bColor[0], bColor[1], bColor[2]) : k.color(wColor[0], wColor[1], wColor[2]),    
+                outline?? k.outline(outline)                   
             ])
         
             let percentage = (reverse)? 100 : 0
@@ -50,7 +71,12 @@ export default function ATB(k: KAPLAYCtx) {
                 k.rect(width, height),
                 k.pos(pos.x, pos.y),       
                 (reverse)? k.color(wColor[0], wColor[1], wColor[2]) : k.color(bColor[0], bColor[1], bColor[2])                        
-            ])    
+            ])  
+            
+            if(radious) {
+                wrapper.radius = radious;
+                bar.radius = radious;
+            }
             
             const controller = k.loop(0.1, () => {
                 const add = Math.floor(100/time)
@@ -65,8 +91,10 @@ export default function ATB(k: KAPLAYCtx) {
                 
             controller.onEnd(() => {
                 action()
-                wrapper.destroy()
-                bar.destroy()
+                if(!stay){
+                    wrapper.destroy()
+                    bar.destroy()                    
+                }
             })
 
             console.log(controller)
