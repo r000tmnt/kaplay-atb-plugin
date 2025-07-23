@@ -1,6 +1,11 @@
 # KAPLAY ATB Plugin
 A KAPLAY plugin to create active time bar!
 
+Install
+```
+npm i kaplay-atb-plugin
+```
+
 ## Usage
 Import the plugin into your kaplay game.
 ```
