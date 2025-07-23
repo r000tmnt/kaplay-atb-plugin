@@ -1,52 +1,37 @@
-# KAPLAY Plugin Template
+# KAPLAY ATB Plugin
+A KAPLAY plugin to create active time bar!
 
-A minimal and clean [**KAPLAY.js**](https://kaplayjs.com) plugin template for 
-creating and publishing plugins.
+## Usage
+Import the plugin into your kaplay game.
+```
+import kaplay from "kaplay";
+import ATB from "../src/plugin";
 
-> If you're reading the `kaplay-hi-plugin-ts` on NPM, this is a demo plugin that adds
-> a `hi()` function to log "hi". If you want to create your plugin, 
-> [check the template](https://github.com/kaplayjs/kaplay-plugin-template-ts).
+const k = kaplay({
+    width: 800,
+    height: 600,
+    plugins: [ATB],
+});
 
-## Download template
-
-You can download the template using **"Download ZIP"** option in **GitHub** or 
-by using `git clone`:
-
-```sh
-git clone https://github.com/kaplayjs/kaplay-plugin-template-ts
+const atb = k.createATB(3, 200, 20, { x: 100, y: 100 }, () => { console.log("ATB filled!") });
 ```
 
-Then navigate to the template folder and install dependencies:
-
-```sh
-cd kaplay-plugin-template-ts
-npm install
+To pause or resume the bar.
+```
+atb.pause()
 ```
 
-## Creating your plugin
-
-Your plugin code is in `src/plugin.ts`. To understand more about KAPLAY plugins, 
-[read this guide](https://kaplayjs.com/guides/plugins/).
-
-## Testing and building
-
-`test/game.ts` file imports your plugin that you can test with a KAPLAY game. 
-You can then build your masterpiece with:
-
-```sh
-npm run build
+By default. The bar will be destroyed when it is filled. If you wish to end it early.
+```
+atb.remove()
 ```
 
-After selecting a name, you can publish it using:
-
-```sh
-npm publish
-```
-
-We recommend adding kaplay- before plugin names. For example:
-
-- `kaplay-matter`
-- `kaplay-box2d`
-- `kaplay-poki`
-
-etc.
+## Parameters
+* time - Number of seconds for the ATB to fill
+* width - Width of the ATB bar
+* height - Height of the ATB bar
+* pos - Position of the ATB bar in the game world
+* action - Things to do when the ATB bar is filled
+* wrapperColor - Optional color for the wrapper of the ATB bar in rgb format
+* barColor - Optional color for the ATB bar in rgb format
+* reverse - If true, the bar will go in reverse order (from right to left)
