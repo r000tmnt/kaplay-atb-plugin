@@ -8,7 +8,7 @@ npm i kaplay-atb-plugin
 
 ## Usage
 Import the plugin into your kaplay game.
-```
+```Javascript
 import kaplay from "kaplay";
 import ATB from 'kaplay-atb-plugin'
 
@@ -22,17 +22,17 @@ const atb = k.createATB(3, 200, 20, { x: 100, y: 100 }, () => { console.log("ATB
 ```
 
 To pause or resume the bar.
-```
+```Javascript
 atb.pause()
 ```
 
 By default. The bar will be destroyed when it is filled. If you wish to end it early.
-```
+```Javascript
 atb.remove()
 ```
 
 Since both the wrapper and bar are GameObj. It is easy to expand it by adding components or change param value.
-```
+```Javascript
 // Add text to the center of the bar
 atb.bar.add([
     k.text('Flexible ATB', { size: 16, font: "monospace", width: atb.bar.width, align: 'center' }),
