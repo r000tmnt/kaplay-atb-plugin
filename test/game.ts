@@ -14,13 +14,19 @@ const atb = k.createATB(
     { x: 100, y: 100 }, 
     () => { console.log("ATB filled!") },
     {
-        stay: true
+        stay: true,
+        outline: 4,
+        radious: 10,
     }
 );
 
 atb.bar.add([
-    k.text('Flexible ATB', { size: 16, font: "monospace" }),
+    k.text('Flexible ATB', { size: 16, font: "monospace", width: atb.bar.width, align: 'center' }),
 ])
+
+atb.wrapper.outline.color = k.color(200, 150, 200).color
+
+console.log(atb)
 
 const pauseBtn = k.add([
     k.rect(100, 50),
@@ -30,7 +36,7 @@ const pauseBtn = k.add([
 ])
 
 pauseBtn.add([
-    k.text("Pause", { size: 24 }),
+    k.text("Pause", { size: 24, align: 'center' }),
 ])
 
 const removeBtn = k.add([
