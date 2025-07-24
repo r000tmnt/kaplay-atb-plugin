@@ -63,7 +63,9 @@ export default function ATB(k: KAPLAYCtx) {
                 k.rect(width, height),
                 k.pos(pos.x, pos.y),       
                 (reverse)? k.color(bColor[0], bColor[1], bColor[2]) : k.color(wColor[0], wColor[1], wColor[2]),  
-                k.outline(outline, (reverse)? k.color(bColor[0], bColor[1], bColor[2]).color : k.color(wColor[0], wColor[1], wColor[2]).color)          
+                (outline && outline > 0)?
+                    k.outline(outline, (reverse)? k.color(bColor[0], bColor[1], bColor[2]).color : k.color(wColor[0], wColor[1], wColor[2]).color) :
+                    "none"      
             ])
         
             let percentage = (reverse)? 100 : 0
@@ -76,7 +78,7 @@ export default function ATB(k: KAPLAYCtx) {
                 (reverse)? k.color(wColor[0], wColor[1], wColor[2]) : k.color(bColor[0], bColor[1], bColor[2])                        
             ])  
             
-            if(radious) {
+            if(radious && radious > 0) {
                 wrapper.radius = radious;
                 bar.radius = radious;
             }
