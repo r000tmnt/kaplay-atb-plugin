@@ -37,8 +37,8 @@ export default function ATB(k: KAPLAYCtx) {
          * @param options - Optional parameters for customizing the ATB bar
          * @param options.wrapperColor - Color of the wrapper in rgb format (default: [0, 0, 0])
          * @param options.barColor - Color of the ATB bar in rgb format (default: [10, 130, 180])
-         * @param options.radious - Radius for the corners of the ATB bar (default: null)
-         * @param options.outline - If true, the bar will have an outline (default  : null) 
+         * @param options.radious - A number to set radius for the corners of the ATB bar (default: null)
+         * @param options.outline - A number to set the weight of outline (default  : null)
          * @param options.reverse - If true, the bar will fill in reverse order (default: false)
          * @param options.stay - If true, the bar will stay on the screen after filling (default: false)
          * @returns - An object containing the wrapper, bar, and controller for the ATB bar
@@ -49,18 +49,21 @@ export default function ATB(k: KAPLAYCtx) {
             height: number, 
             pos: { x: number, y: number },
             action: Function,
-            options: ATBPOptions = {}
+            options: ATBPOptions = {
+                radious: -1,
+                outline: -1,
+            }
         ) {
             const { wrapperColor, barColor, radious, outline, reverse, stay } = options;
 
-            let wColor = wrapperColor ? wrapperColor : [0, 0, 0];
-            let bColor = barColor ? barColor : [10, 130, 180];
+            let wColor = wrapperColor?? [0, 0, 0];
+            let bColor = barColor?? [10, 130, 180];
 
             const wrapper = k.add([
                 k.rect(width, height),
                 k.pos(pos.x, pos.y),       
-                (reverse)? k.color(bColor[0], bColor[1], bColor[2]) : k.color(wColor[0], wColor[1], wColor[2]),    
-                outline?? k.outline(outline)                   
+                (reverse)? k.color(bColor[0], bColor[1], bColor[2]) : k.color(wColor[0], wColor[1], wColor[2]),  
+                k.outline(outline, (reverse)? k.color(bColor[0], bColor[1], bColor[2]).color : k.color(wColor[0], wColor[1], wColor[2]).color)          
             ])
         
             let percentage = (reverse)? 100 : 0
@@ -96,8 +99,6 @@ export default function ATB(k: KAPLAYCtx) {
                     bar.destroy()                    
                 }
             })
-
-            console.log(controller)
 
             return {
                 wrapper,
