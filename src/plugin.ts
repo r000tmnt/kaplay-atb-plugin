@@ -1,27 +1,97 @@
 import type { GameObj, TimerController, KAPLAYCtx } from "kaplay";
 
 export interface ATBBar {
-    wrapper: GameObj;
-    bar: GameObj;
-    controller: TimerController;
+    wrapper: GameObj | null;
+    bar: GameObj | null;
+    controller: TimerController | customTimeController;
     pause: Function;
     remove: Function;
 }
 
+type direction = 'horizontal'|'vertical'
+type mode = 'dynamic'|'static'
+
+interface customTimeController {
+    paused: boolean,
+    cancel: () => void
+}
+
 /**
+ * @param parent - Optional. If set, the bar will be the child of the GameObj. If the mode set to static, the bar will be draw with the onDraw event of the GameObj. 
  * @param wrapperColor - Optional color for the wrapper of the ATB bar in rgb format
  * @param barColor - Optional color for the ATB bar in rgb format
  * @param radious - Optional radius for the corners of the ATB bar
  * @param outline - If true, the bar will have an outline
  * @param reverse - If true, the bar will go in reverse order (from right to left)
+ * @param direction - Support horizontal and vertical.
  */
 interface ATBPOptions{
+    parent?: GameObj
     wrapperColor?: number[];
     barColor?: number[];
     radious?: number;
-    outline?: number;
+    outline?: { width: number, color?: number[] };
     reverse?: boolean;
     stay?: boolean;
+    direction?: direction
+    mode?: mode
+}
+
+const drawStaticBar = (
+    k: KAPLAYCtx, 
+    width: number, 
+    height: number, 
+    time: number, 
+    pos: { x: number, y: number },
+    percentage: number, 
+    wColor: number[],
+    controller: customTimeController,
+    direction?: ATBPOptions['direction'],
+    radius?: ATBPOptions['radious'],
+    reverse?: ATBPOptions['reverse'],
+    outline?: ATBPOptions['outline']
+) => {
+    // Draw wrapper
+    k.drawRect({
+        width,
+        height,
+        pos: k.vec2(pos.x, pos.y),
+        color: k.rgb(wColor[0], wColor[1], wColor[2]),
+        radius: radius?? 0,
+        outline: {
+            width: outline?.width,
+            color: outline?.color?
+                k.rgb(outline.color[0], outline.color[1], outline.color[2]):
+                k.rgb(wColor[0], wColor[1], wColor[2])
+        }
+    })   
+
+    // Stop updating bar width or height
+    if(controller.paused) return percentage
+    
+    const add = Math.floor(1/time)
+    percentage = (percentage + add > 100)? 100 : percentage + add
+
+    // Draw inner bar
+    if(direction === 'vertical'){
+        const newWidth =  width * (percentage/100)
+        k.drawRect({
+            width: newWidth,
+            height,
+            pos: k.vec2(reverse? pos.x + width : pos.x, pos.y),
+            radius: radius?? 0,
+        })
+    }else{
+        const newHeight =  height * (percentage/100)
+        k.drawRect({
+            width,
+            height: newHeight,
+            pos: k.vec2(reverse? pos.x + width : pos.x, pos.y),
+            radius: radius?? 0,
+        })
+    }       
+
+    return percentage
 }
 
 export default function ATB(k: KAPLAYCtx) {
@@ -51,70 +121,159 @@ export default function ATB(k: KAPLAYCtx) {
             action: Function,
             options: ATBPOptions = {
                 radious: -1,
-                outline: -1,
+                outline: {
+                    width: 0,
+                    color: undefined
+                },
+                direction: 'horizontal'
             }
         ) {
-            const { wrapperColor, barColor, radious, outline, reverse, stay } = options;
+            const { parent, wrapperColor, barColor, radious, outline, reverse, stay, direction, mode } = options;
 
             let wColor = wrapperColor?? [0, 0, 0];
             let bColor = barColor?? [10, 130, 180];
-
-            const wrapper = k.add([
-                k.rect(width, height),
-                k.pos(pos.x, pos.y),       
-                (reverse)? k.color(bColor[0], bColor[1], bColor[2]) : k.color(wColor[0], wColor[1], wColor[2]),  
-                (outline && outline > 0)?
-                    k.outline(outline, (reverse)? k.color(bColor[0], bColor[1], bColor[2]).color : k.color(wColor[0], wColor[1], wColor[2]).color) :
-                    "none"      
-            ])
-        
-            let percentage = (reverse)? 100 : 0
-
-            time = time * 10
-
-            const bar = k.add([
-                k.rect(width, height),
-                k.pos(pos.x, pos.y),       
-                (reverse)? k.color(wColor[0], wColor[1], wColor[2]) : k.color(bColor[0], bColor[1], bColor[2])                        
-            ])  
             
-            if(radious && radious > 0) {
-                wrapper.radius = radious;
-                bar.radius = radious;
-            }
-            
-            const controller = k.loop(0.1, () => {
-                const add = Math.floor(100/time)
-                if(reverse) {
-                    percentage = (percentage - add < 0)? 0 : percentage - add
+            let percentage = 0
+
+            if(mode === 'dynamic'){
+                time = time * 10
+
+                let wrapper: GameObj
+
+                if(parent){
+                    wrapper = parent.add([
+                        k.rect(width, height),
+                        k.pos(pos.x, pos.y),       
+                        k.color(wColor[0], wColor[1], wColor[2]),  
+                        (outline?.width)?
+                            k.outline(
+                                outline.width, 
+                                (outline.color && outline.color.length)? 
+                                    k.rgb(outline.color[0], outline.color[1], outline.color[2]) :
+                                    k.rgb(wColor[0], wColor[1], wColor[2])
+                            ) :
+                            "none"      
+                    ])
                 }else{
-                    percentage = (percentage + add > 100)? 100 : percentage + add
+                    wrapper = k.add([
+                        k.rect(width, height),
+                        k.pos(pos.x, pos.y),       
+                        k.color(wColor[0], wColor[1], wColor[2]),  
+                        (outline?.width)?
+                            k.outline(
+                                outline.width, 
+                                (outline.color && outline.color.length)? 
+                                    k.rgb(outline.color[0], outline.color[1], outline.color[2]) :
+                                    k.rgb(wColor[0], wColor[1], wColor[2])
+                            ) :
+                            "none"      
+                    ])                   
                 }
-                const newWidth = width * (percentage/100)
-                k.tween(bar.width, newWidth, 0, (p) => bar.width = p, k.easings.linear)
-                }, time)
-                
-            controller.onEnd(() => {
-                action()
-                if(!stay){
-                    wrapper.destroy()
-                    bar.destroy()                    
-                }
-            })
 
-            return {
-                wrapper,
-                bar,
-                controller,
-                pause(this) {
-                    this.controller.paused = !this.controller.paused;
-                },
-                remove(this) {
-                    this.controller.cancel();
-                    this.wrapper.destroy();
-                    this.bar.destroy();
+                const bar = wrapper.add([
+                    k.rect(width, height),
+                    k.pos(reverse? pos.x + width : pos.x, pos.y),       
+                    k.color(bColor[0], bColor[1], bColor[2]),
+                    reverse? k.anchor('topright') : k.anchor('topleft')                      
+                ])  
+                
+                if(radious && radious > 0) {
+                    wrapper.radius = radious;
+                    bar.radius = radious;
                 }
-            } as ATBBar;
+                
+                const controller = k.loop(0.1, () => {
+                    const add = Math.floor(100/time)
+                    percentage = (percentage + add > 100)? 100 : percentage + add
+
+                    if(direction === 'vertical'){
+                        const newWidth =  width * (percentage/100)
+                        k.tween(bar.width, newWidth, 0, (p) => bar.width = p, k.easings.linear)
+                    }else{
+                        const newHeight =  height * (percentage/100)
+                        k.tween(bar.height, newHeight, 0, (p) => bar.height = p, k.easings.linear)
+                    }
+                }, time)
+                    
+                controller.onEnd(() => {
+                    action()
+                    if(!stay){
+                        wrapper.destroy()
+                        bar.destroy()                    
+                    }
+                }) 
+
+                return {
+                    wrapper,
+                    bar,
+                    controller,
+                    pause(this) {
+                        this.controller.paused = !this.controller.paused;
+                    },
+                    remove(this) {
+                        this.controller.cancel();
+                        this.wrapper?.destroy();
+                        this.bar?.destroy();
+                    }
+                } as ATBBar;
+            }else{
+                time = time * 60 // Frame      
+                
+                const controller: customTimeController = {
+                    paused: false,
+                    cancel: () => {
+                        console.log('facking cancel')
+                    }
+                }                
+
+                if(parent){
+                    parent.onDraw(() => {
+                        percentage = drawStaticBar(
+                            k,
+                            width,
+                            height,
+                            time,
+                            pos,
+                            percentage,
+                            wColor,
+                            controller,
+                            direction,
+                            radious,
+                            reverse,
+                            outline
+                        )
+                    })
+                }else{
+                    k.onDraw(() => {
+                        percentage = drawStaticBar(
+                            k,
+                            width,
+                            height,
+                            time,
+                            pos,
+                            percentage,
+                            wColor,
+                            controller,
+                            direction,
+                            radious,
+                            reverse,
+                            outline
+                        )
+                    })
+                }
+
+                return {
+                    wrapper: null,
+                    bar: null,
+                    controller,
+                    pause(this) {
+                        this.controller.paused = !this.controller.paused;
+                    },
+                    remove(this) {
+                        this.controller.cancel();
+                    }
+                } as ATBBar;                
+            }
         }
     };
 }
