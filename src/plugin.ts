@@ -25,7 +25,7 @@ interface customTimeController {
  * @param reverse - If true, the bar will go in reverse order (from right to left)
  * @param direction - Support horizontal and vertical.
  */
-interface ATBPOptions{
+interface ATBOptions{
     parent?: GameObj
     wrapperColor?: number[];
     barColor?: number[];
@@ -46,10 +46,10 @@ const drawStaticBar = (
     percentage: number, 
     wColor: number[],
     controller: customTimeController,
-    direction?: ATBPOptions['direction'],
-    radius?: ATBPOptions['radius'],
-    reverse?: ATBPOptions['reverse'],
-    outline?: ATBPOptions['outline']
+    direction?: ATBOptions['direction'],
+    radius?: ATBOptions['radius'],
+    reverse?: ATBOptions['reverse'],
+    outline?: ATBOptions['outline']
 ) => {
     // Draw wrapper
     k.drawRect({
@@ -119,7 +119,7 @@ export default function ATB(k: KAPLAYCtx) {
             height: number, 
             pos: { x: number, y: number },
             action: Function,
-            options: ATBPOptions = {
+            options: ATBOptions = {
                 radius: -1,
                 outline: {
                     width: 0,
