@@ -20,7 +20,7 @@ interface customTimeController {
  * @param parent - Optional. If set, the bar will be the child of the GameObj. If the mode set to static, the bar will be draw with the onDraw event of the GameObj. 
  * @param wrapperColor - Optional color for the wrapper of the ATB bar in rgb format
  * @param barColor - Optional color for the ATB bar in rgb format
- * @param radious - Optional radius for the corners of the ATB bar
+ * @param radius - Optional radius for the corners of the ATB bar
  * @param outline - If true, the bar will have an outline
  * @param reverse - If true, the bar will go in reverse order (from right to left)
  * @param direction - Support horizontal and vertical.
@@ -29,7 +29,7 @@ interface ATBPOptions{
     parent?: GameObj
     wrapperColor?: number[];
     barColor?: number[];
-    radious?: number;
+    radius?: number;
     outline?: { width: number, color?: number[] };
     reverse?: boolean;
     stay?: boolean;
@@ -47,7 +47,7 @@ const drawStaticBar = (
     wColor: number[],
     controller: customTimeController,
     direction?: ATBPOptions['direction'],
-    radius?: ATBPOptions['radious'],
+    radius?: ATBPOptions['radius'],
     reverse?: ATBPOptions['reverse'],
     outline?: ATBPOptions['outline']
 ) => {
@@ -107,7 +107,7 @@ export default function ATB(k: KAPLAYCtx) {
          * @param options - Optional parameters for customizing the ATB bar
          * @param options.wrapperColor - Color of the wrapper in rgb format (default: [0, 0, 0])
          * @param options.barColor - Color of the ATB bar in rgb format (default: [10, 130, 180])
-         * @param options.radious - A number to set radius for the corners of the ATB bar (default: null)
+         * @param options.radius - A number to set radius for the corners of the ATB bar (default: null)
          * @param options.outline - A number to set the weight of outline (default  : null)
          * @param options.reverse - If true, the bar will fill in reverse order (default: false)
          * @param options.stay - If true, the bar will stay on the screen after filling (default: false)
@@ -120,7 +120,7 @@ export default function ATB(k: KAPLAYCtx) {
             pos: { x: number, y: number },
             action: Function,
             options: ATBPOptions = {
-                radious: -1,
+                radius: -1,
                 outline: {
                     width: 0,
                     color: undefined
@@ -128,7 +128,7 @@ export default function ATB(k: KAPLAYCtx) {
                 direction: 'horizontal'
             }
         ) {
-            const { parent, wrapperColor, barColor, radious, outline, reverse, stay, direction, mode } = options;
+            const { parent, wrapperColor, barColor, radius, outline, reverse, stay, direction, mode } = options;
 
             let wColor = wrapperColor?? [0, 0, 0];
             let bColor = barColor?? [10, 130, 180];
@@ -177,9 +177,9 @@ export default function ATB(k: KAPLAYCtx) {
                     reverse? k.anchor('topright') : k.anchor('topleft')                      
                 ])  
                 
-                if(radious && radious > 0) {
-                    wrapper.radius = radious;
-                    bar.radius = radious;
+                if(radius && radius > 0) {
+                    wrapper.radius = radius;
+                    bar.radius = radius;
                 }
                 
                 const controller = k.loop(0.1, () => {
@@ -238,7 +238,7 @@ export default function ATB(k: KAPLAYCtx) {
                             wColor,
                             controller,
                             direction,
-                            radious,
+                            radius,
                             reverse,
                             outline
                         )
@@ -255,7 +255,7 @@ export default function ATB(k: KAPLAYCtx) {
                             wColor,
                             controller,
                             direction,
-                            radious,
+                            radius,
                             reverse,
                             outline
                         )
