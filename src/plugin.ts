@@ -1,4 +1,4 @@
-import type { GameObj, TimerController, KAPLAYCtx, DrawTextOpt, TextCompOpt, Color } from "kaplay";
+import type { GameObj, TimerController, KAPLAYCtx, Color } from "kaplay";
 
 export interface ATBBar {
     wrapper: GameObj | null;
@@ -39,7 +39,7 @@ interface ATBOptions{
         text: string,
         color: Color,
         anchor: 'left'|'center'|'right'
-    } | TextCompOpt | DrawTextOpt
+    }
 }
 
 const drawStaticBar = (
@@ -258,16 +258,25 @@ export default function ATB(k: KAPLAYCtx) {
 
                 const barWidth = outline?.width? width - outline.width : width
                 const barHeight = outline?.width? height - outline.width : height
+                const barPos = { x:0, y:0 }
+
+                if(outline?.width){
+                    barPos.x += outline.width / 2
+                    barPos.y += outline.width / 2
+                }
+
+                if(direction === 'vertical' && reverse){
+                    barPos.y += barHeight
+                }
+
+                if(direction === 'horizontal' && reverse){
+                    barPos.x += barWidth
+                }
 
                 const bar = wrapper.add([
+                    k.area(),
                     k.rect(barWidth, barHeight),
-                    k.pos(
-                        outline?.width? 0 + (outline.width / 2) : 0, 
-                        outline?.width? 
-                            direction === 'vertical' && reverse?
-                                0 + (outline.width / 2) + barHeight :
-                                0 + (outline.width / 2) : 0
-                    ),       
+                    k.pos(barPos.x, barPos.y),       
                     k.color(bColor),
                     direction === 'vertical'? 
                         reverse? 
@@ -280,6 +289,77 @@ export default function ATB(k: KAPLAYCtx) {
                 if(radius && radius > 0) {
                     wrapper.radius = radius;
                     bar.radius = radius;
+                }
+
+                if(options.text){
+                    const text = options.text.text
+                    // Invisible canvas to measure text width
+                    // Reference: https://stackoverflow.com/a/47376591/14173422
+                    const textCanvas = document.createElement('canvas');                    
+                    if(direction === 'vertical'){
+                        textCanvas.width = 16
+                        textCanvas.height = (text.length - 1) * 16
+                        const ctx = textCanvas.getContext('2d');
+                        if(ctx){
+                            // console.log('measuring text', ctx.measureText(text).width)
+                            textCanvas.height += (ctx.measureText(text).width / 2)
+                            ctx.font = '16px monospace';
+                            ctx.fillStyle = 'white';
+                            ctx.textAlign = "center";                              
+                        }
+                        
+                        for(let i=0; i < text.length; i++){
+                            ctx?.fillText(text[i], textCanvas.width / 2, textCanvas.width + (i * 16));
+                        }
+                    }else{
+                        const ctx = textCanvas.getContext('2d');
+                        if(ctx){
+                            textCanvas.width = (text.length - 1) * 16
+                            textCanvas.height = 16
+                            ctx.font = '16px monospace';
+                            ctx.fillStyle = 'white';
+                            ctx.textAlign = "center";                              
+                            ctx.fillText(text, textCanvas.width / 2, outline?.width? textCanvas.height - outline.width : textCanvas.height - 2);
+                        }
+                    }
+
+                    const dataURL: string = textCanvas.toDataURL();
+
+                    k.loadSprite('atb-text', dataURL)
+
+                    bar.add([
+                        k.area(),
+                        k.sprite('atb-text'),
+                        options.text.anchor === 'center'?
+                            direction === 'vertical'?
+                            k.pos((barWidth / 2) - (textCanvas.width / 2), reverse? 0 - ((textCanvas.height + barHeight)) / 2 : 0) :
+                            k.pos((barWidth / 2) - (textCanvas.width / 2), 0) : k.pos(0, 0)
+                    ])
+
+                    // bar.add([
+                    //     k.text(`[vertical]${text}[/vertical]`, { 
+                    //         size: 16, 
+                    //         font: "monospace",
+                    //         align: options.text.anchor?? 'left',
+                    //         width: barWidth,
+                    //         styles: {
+                    //             "vertical": (idx, ch) => {
+                    //                 const chX = ctx? 0 - ctx.measureText(text.substring(0, (idx + 1) === text.length? idx : idx + 1)).width : (0 - idx) * 16
+                    //                 const chY = idx * 16;
+
+                    //                 console.log('styling', idx, chX)
+
+                    //                 return {
+                    //                     pos: k.vec2(chX, chY),
+                    //                 }
+                    //             }
+                    //         }
+                    //     }),
+                    //     k.color(options.text.color?? k.rgb(255, 255, 255)),
+                    //     k.pos(0, 0)
+                    // ])   
+
+                    textCanvas.remove() // Clean up the canvas element after use
                 }
                 
                 const controller = k.loop(0.1, () => {
