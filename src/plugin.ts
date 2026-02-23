@@ -333,7 +333,7 @@ export default function ATB(k: KAPLAYCtx) {
                         options.text.anchor === 'center'?
                             direction === 'vertical'?
                             k.pos((barWidth / 2) - (textCanvas.width / 2), reverse? 0 - ((textCanvas.height + barHeight)) / 2 : 0) :
-                            k.pos((barWidth / 2) - (textCanvas.width / 2), 0) : k.pos(0, 0)
+                            k.pos(reverse? 0 - (textCanvas.width + (Math.abs(barWidth - textCanvas.width) / 2)) : (barWidth / 2) - (textCanvas.width / 2), 0) : k.pos(0, 0)
                     ])
 
                     // bar.add([
