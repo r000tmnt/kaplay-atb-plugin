@@ -263,10 +263,18 @@ export default function ATB(k: KAPLAYCtx) {
                     k.rect(barWidth, barHeight),
                     k.pos(
                         outline?.width? 0 + (outline.width / 2) : 0, 
-                        outline?.width? 0 + (outline.width / 2) : 0
+                        outline?.width? 
+                            direction === 'vertical' && reverse?
+                                0 + (outline.width / 2) + barHeight :
+                                0 + (outline.width / 2) : 0
                     ),       
                     k.color(bColor),
-                    reverse? k.anchor('topright') : k.anchor('topleft'),                                       
+                    direction === 'vertical'? 
+                        reverse? 
+                            k.anchor('botleft') : k.anchor('topleft'):
+                    direction === 'horizontal'?
+                        reverse?
+                            k.anchor('topright') : k.anchor('topleft') : k.anchor('topleft')
                 ])  
                 
                 if(radius && radius > 0) {
