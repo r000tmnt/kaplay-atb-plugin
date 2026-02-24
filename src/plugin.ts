@@ -1,4 +1,4 @@
-import type { GameObj, TimerController, KAPLAYCtx, Color, Vec2 } from "kaplay";
+import type { GameObj, TimerController, KAPLAYCtx, Color, Vec2, KEventController } from "kaplay";
 
 export interface ATBBar {
     wrapper: GameObj | null;
@@ -13,6 +13,7 @@ type mode = 'dynamic'|'static'
 
 interface customTimeController {
     paused: boolean,
+    done: boolean,
     cancel: () => void
 }
 
@@ -244,6 +245,7 @@ export default function ATB(k: KAPLAYCtx) {
                 
                 const controller: customTimeController = {
                     paused: false,
+                    done: false,
                     cancel: () => {
                         console.log('faking cancel')
                         cancel = true
@@ -263,9 +265,11 @@ export default function ATB(k: KAPLAYCtx) {
                     textCanvas = null // Clean up the canvas element after use
                 }
 
+                let onDrawEvent : KEventController
+
                 if(parent){
-                    parent.onDraw(() => {
-                        if(cancel) return
+                    onDrawEvent = parent.onDraw(() => {
+                        if(cancel) onDrawEvent.cancel()  
                         percentage = drawStaticBar(
                             k,
                             width,
@@ -282,10 +286,19 @@ export default function ATB(k: KAPLAYCtx) {
                             outline,
                             textOptions
                         )
+
+                        if(percentage === 1 && !controller.done){
+                            controller.done = true
+                            action()
+                            if(!stay){
+                                // Stop onDraw event      
+                                onDrawEvent.cancel()        
+                            }                               
+                        }
                     })
                 }else{
-                    k.onDraw(() => {
-                        if(cancel) return
+                    onDrawEvent = k.onDraw(() => {
+                        if(cancel) onDrawEvent.cancel()  
                         percentage = drawStaticBar(
                             k,
                             width,
@@ -302,6 +315,15 @@ export default function ATB(k: KAPLAYCtx) {
                             outline,
                             textOptions
                         )
+
+                        if(percentage === 1 && !controller.done){
+                            controller.done = true
+                            action()
+                            if(!stay){
+                                // Stop onDraw event      
+                                onDrawEvent.cancel()        
+                            }                               
+                        }                        
                     })
                 }
 
