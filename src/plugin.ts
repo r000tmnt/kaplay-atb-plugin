@@ -34,12 +34,11 @@ interface ATBOptions{
     outline?: { width: number, color?: Color };
     reverse?: boolean;
     stay?: boolean;
-    direction?: direction
     mode?: mode,
     text?: {
         text: string,
-        color: Color,
-        anchor: 'left'|'center'|'right'
+        color?: Color,
+        anchor?: 'start'|'center'|'end'
     }
 }
 
@@ -60,7 +59,7 @@ const drawStaticBar = (
     text?: {
         sprite: string,
         color: Color,
-        anchor: 'left'|'center'|'right'
+        anchor: 'start'|'center'|'end'
         pos: { x: number, y: number }
     }
 ) => {
@@ -130,10 +129,8 @@ const drawStaticBar = (
         k.drawSprite({
             sprite: text.sprite,
             pos: k.vec2(
-                (innerBarPos.x + text.pos.x) - (outline?.width? outline.width / 2 : 0), 
-                (direction === 'vertical') ? 
-                    (innerBarPos.y + text.pos.y) - (outline?.width? outline.width / 2 : 0) :
-                    (innerBarPos.y + text.pos.y) + (outline?.width? outline.width / 2 : 0)),
+                (innerBarPos.x === pos.x)? innerBarPos.x + text.pos.x : pos.x + text.pos.x, 
+                (innerBarPos.y === pos.y)? innerBarPos.y + text.pos.y : pos.y + text.pos.y),
         })
     }
 
@@ -147,7 +144,7 @@ const prepareTextSprite = (k: KAPLAYCtx, text: string, color: Color, direction: 
     const textCanvas = document.createElement('canvas');                    
     if(direction === 'vertical'){
         textCanvas.width = 16
-        textCanvas.height = (text.length - 1) * 16
+        textCanvas.height = text.length * 16
         const ctx = textCanvas.getContext('2d');
         if(ctx){
             // console.log('measuring text', ctx.measureText(text).width)
@@ -163,7 +160,7 @@ const prepareTextSprite = (k: KAPLAYCtx, text: string, color: Color, direction: 
     }else{
         const ctx = textCanvas.getContext('2d');
         if(ctx){
-            textCanvas.width = (text.length - 1) * 16
+            textCanvas.width = text.length * 16
             textCanvas.height = 16
             ctx.font = '16px monospace';
             ctx.fillStyle = 'white';
@@ -198,11 +195,10 @@ export default function ATB(k: KAPLAYCtx) {
          * @param options.outline - A number to set the weight of outline (default  : null)
          * @param options.reverse - If true, the bar will fill in reverse order (default: false)
          * @param options.stay - If true, the bar will stay on the screen after filling (default: false)
-         * @param options.direction - The default horizontal. Set to vertical if you wish to animate the bar height.
          * @param options.mode - The default is dynamic. Set to static if you have no need to manipulate the bar further more. Which means the bar will render with onDraw event.
          * @param options.text - Support TextCompOpt or DrawTextOpt from Kaplay. The minimum params as list below.
             * @param options.text.text - The text to display.
-            * @param options.text.color
+            * @param options.text.color - The color of the text. Default to white.
          * @returns - An object containing the wrapper, bar, and controller for the ATB bar
          */
         createATB(
@@ -217,18 +213,17 @@ export default function ATB(k: KAPLAYCtx) {
                     width: 0,
                     color: undefined
                 },
-                direction: 'horizontal',
                 mode: 'dynamic'
             }
         ) {
-            let { parent, wrapperColor, barColor, radius, outline, reverse, stay, direction, mode, text } = options;
+            let { parent, wrapperColor, barColor, radius, outline, reverse, stay, mode, text } = options;
 
             let wColor = wrapperColor?? k.rgb(0, 0, 0);
             let bColor = barColor?? k.rgb(10, 130, 180);
             
             let percentage = 0
 
-            direction = direction?? 'horizontal'
+            const direction = width > height? 'horizontal' : 'vertical'
             mode = mode?? 'dynamic'
 
             if(mode === 'static'){
@@ -239,7 +234,7 @@ export default function ATB(k: KAPLAYCtx) {
                 let textOptions = {
                     sprite: '',
                     color: text?.color?? k.rgb(255, 255, 255),
-                    anchor: text?.anchor?? 'left',
+                    anchor: text?.anchor?? 'center',
                     pos: { x: 0, y: 0 }
                 }
                 
@@ -254,14 +249,22 @@ export default function ATB(k: KAPLAYCtx) {
                 }         
                 
                 if(text){
-                    let { textCanvas, name } : { textCanvas: HTMLCanvasElement | null, name: string } = prepareTextSprite(k, text.text, text.color, direction, outline?.width?? 0)
+                    let { textCanvas, name } : { textCanvas: HTMLCanvasElement | null, name: string } = prepareTextSprite(k, text.text, text.color?? k.rgb(255, 255, 255), direction, outline?.width?? 0)
                     textOptions.sprite = name
                     textOptions.pos =
-                    text.anchor === 'center'?
                         direction === 'vertical'?
-                        { x:(width / 2) - (textCanvas.width / 2), y: reverse? 0 - ((textCanvas.height + height)) / 2 : 0  }:
-                        { x: reverse? 0 - (textCanvas.width + (Math.abs(width - textCanvas.width) / 2)) : (width / 2) - (textCanvas.width / 2), y:  0 }: textOptions.pos  
-                        
+                            textOptions.anchor === 'center'?
+                                { x: (width - textCanvas.width) / 2, y: (height / 2) - (textCanvas.height / 2)}:
+                            textOptions.anchor === 'start'?
+                                { x: (width - textCanvas.width) / 2, y: reverse? height - textCanvas.height : 0 }:
+                                { x: (width - textCanvas.width) / 2, y: reverse? 0 : height - textCanvas.height } :
+                        // Horizontal
+                        textOptions.anchor === 'center'?
+                        { x: reverse? 0 - (textCanvas.width + (Math.abs(width - textCanvas.width) / 2)) : (width / 2) - (textCanvas.width / 2), y:  0 }:
+                        textOptions.anchor === 'start'?
+                        { x: 0, y: 0 }:
+                        { x: width - textCanvas.width, y: 0 }
+
                     textCanvas = null // Clean up the canvas element after use
                 }
 
@@ -412,15 +415,25 @@ export default function ATB(k: KAPLAYCtx) {
 
                 if(options.text){
                     const text = options.text.text
-                    let { textCanvas, name } : { textCanvas: HTMLCanvasElement | null, name: string } = prepareTextSprite(k, text, options.text.color, direction, outline?.width?? 0)
+                    if(!options.text.anchor) options.text.anchor = 'center'
+                    let { textCanvas, name } : { textCanvas: HTMLCanvasElement | null, name: string } = prepareTextSprite(k, text, options.text.color?? k.rgb(255, 255, 255), direction, outline?.width?? 0)
 
                     bar.add([
                         k.area(),
                         k.sprite(name),
+                        direction === 'vertical'?
+                            options.text.anchor === 'center'?
+                                k.pos(0, reverse? 0 - (textCanvas.height + barHeight) / 2 : (barHeight / 2) - (textCanvas.height / 2)) :
+                            options.text.anchor === 'start'?
+                                k.pos(0, reverse? 0 - textCanvas.height : 0) :
+                                k.pos(barWidth - textCanvas.width, reverse? 0 - barHeight : barHeight - textCanvas.height) :
+                        // Horizontal
                         options.text.anchor === 'center'?
-                            direction === 'vertical'?
-                            k.pos((barWidth / 2) - (textCanvas.width / 2), reverse? 0 - ((textCanvas.height + barHeight)) / 2 : 0) :
-                            k.pos(reverse? 0 - (textCanvas.width + (Math.abs(barWidth - textCanvas.width) / 2)) : (barWidth / 2) - (textCanvas.width / 2), 0) : k.pos(0, 0)
+                            k.pos(reverse? 0 - (textCanvas.width + (Math.abs(barWidth - textCanvas.width) / 2)) : 
+                            (barWidth / 2) - (textCanvas.width / 2), 0) :
+                        options.text.anchor === 'start'?    
+                            k.pos(reverse? 0 - textCanvas.width : 0, 0) :
+                            k.pos(reverse? 0 - barWidth : barWidth - textCanvas.width, 0)
                     ])
 
                     // bar.add([
