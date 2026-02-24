@@ -1,4 +1,4 @@
-import type { GameObj, TimerController, KAPLAYCtx, Color } from "kaplay";
+import type { GameObj, TimerController, KAPLAYCtx, Color, Vec2 } from "kaplay";
 
 export interface ATBBar {
     wrapper: GameObj | null;
@@ -52,10 +52,16 @@ const drawStaticBar = (
     wColor: Color,
     bColor: Color,
     controller: customTimeController,
-    direction?: ATBOptions['direction'],
+    direction: direction,
     radius?: ATBOptions['radius'],
     reverse?: ATBOptions['reverse'],
-    outline?: ATBOptions['outline']
+    outline?: ATBOptions['outline'],
+    text?: {
+        sprite: string,
+        color: Color,
+        anchor: 'left'|'center'|'right'
+        pos: { x: number, y: number }
+    }
 ) => {
     // Draw wrapper
     k.drawRect({
@@ -78,28 +84,99 @@ const drawStaticBar = (
         percentage = (percentage + add > 1)? 1 : percentage + add
     }
 
+    let innerBarPos : Vec2
+    const barWidth = outline?.width? width - outline.width : width
+    const barHeight = outline?.width? height - outline.width : height
+
     // Draw inner bar
     if(direction === 'vertical'){
-        const newHeight =  height * percentage
+        innerBarPos = k.vec2(pos.x, reverse? pos.y + barHeight : pos.y)
+        const newHeight =  barHeight * percentage
+
+        if(outline?.width){
+            innerBarPos.x += outline.width / 2
+            innerBarPos.y += outline.width / 2
+        }
+
         k.drawRect({
-            width,
+            width: barWidth,
             height: newHeight,
-            pos: k.vec2(reverse? pos.x + width : pos.x, pos.y),
+            pos: innerBarPos,
             color: bColor,
             radius: radius?? 0,
+            anchor: reverse? 'botleft' : 'topleft'
         })
     }else{
-        const newWidth =  width * percentage
+        innerBarPos = k.vec2(reverse? pos.x + barWidth : pos.x, pos.y)
+        const newWidth =  barWidth * percentage
+
+        if(outline?.width){
+            innerBarPos.x += outline.width / 2
+            innerBarPos.y += outline.width / 2
+        }
+
         k.drawRect({
             width: newWidth,
-            height,
-            pos: k.vec2(reverse? pos.x + width : pos.x, pos.y),
+            height: barHeight,
+            pos: innerBarPos,
             color: bColor,
             radius: radius?? 0,
+            anchor: reverse? 'topright' : 'topleft'
         })        
     }       
 
+    if(text){
+        k.drawSprite({
+            sprite: text.sprite,
+            pos: k.vec2(
+                (innerBarPos.x + text.pos.x) - (outline?.width? outline.width / 2 : 0), 
+                (direction === 'vertical') ? 
+                    (innerBarPos.y + text.pos.y) - (outline?.width? outline.width / 2 : 0) :
+                    (innerBarPos.y + text.pos.y) + (outline?.width? outline.width / 2 : 0)),
+        })
+    }
+
     return percentage
+}
+
+// Invisible canvas to measure text width
+// Reference: https://stackoverflow.com/a/47376591/14173422
+const prepareTextSprite = (k: KAPLAYCtx, text: string, color: Color, direction: direction, outline = 0) => {
+
+    const textCanvas = document.createElement('canvas');                    
+    if(direction === 'vertical'){
+        textCanvas.width = 16
+        textCanvas.height = (text.length - 1) * 16
+        const ctx = textCanvas.getContext('2d');
+        if(ctx){
+            // console.log('measuring text', ctx.measureText(text).width)
+            textCanvas.height += (ctx.measureText(text).width / 2)
+            ctx.font = '16px monospace';
+            ctx.fillStyle = color.toHex();
+            ctx.textAlign = "center";                              
+        }
+        
+        for(let i=0; i < text.length; i++){
+            ctx?.fillText(text[i], textCanvas.width / 2, textCanvas.width + (i * 16));
+        }
+    }else{
+        const ctx = textCanvas.getContext('2d');
+        if(ctx){
+            textCanvas.width = (text.length - 1) * 16
+            textCanvas.height = 16
+            ctx.font = '16px monospace';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = "center";                              
+            ctx.fillText(text, textCanvas.width / 2, outline? textCanvas.height - outline : textCanvas.height - 2);
+        }
+    }
+
+    const dataURL: string = textCanvas.toDataURL();
+    const name = 'atb-text' + Date.now() // Unique name for the sprite
+
+    k.loadSprite(name, dataURL)    
+
+    return { textCanvas, name }
 }
 
 export default function ATB(k: KAPLAYCtx) {
@@ -143,7 +220,7 @@ export default function ATB(k: KAPLAYCtx) {
                 mode: 'dynamic'
             }
         ) {
-            let { parent, wrapperColor, barColor, radius, outline, reverse, stay, direction, mode } = options;
+            let { parent, wrapperColor, barColor, radius, outline, reverse, stay, direction, mode, text } = options;
 
             let wColor = wrapperColor?? k.rgb(0, 0, 0);
             let bColor = barColor?? k.rgb(10, 130, 180);
@@ -158,6 +235,12 @@ export default function ATB(k: KAPLAYCtx) {
 
                 // Cancel state
                 let cancel = false
+                let textOptions = {
+                    sprite: '',
+                    color: text?.color?? k.rgb(255, 255, 255),
+                    anchor: text?.anchor?? 'left',
+                    pos: { x: 0, y: 0 }
+                }
                 
                 const controller: customTimeController = {
                     paused: false,
@@ -166,7 +249,19 @@ export default function ATB(k: KAPLAYCtx) {
                         cancel = true
                         percentage = 0
                     }
-                }                
+                }         
+                
+                if(text){
+                    let { textCanvas, name } : { textCanvas: HTMLCanvasElement | null, name: string } = prepareTextSprite(k, text.text, text.color, direction, outline?.width?? 0)
+                    textOptions.sprite = name
+                    textOptions.pos =
+                    text.anchor === 'center'?
+                        direction === 'vertical'?
+                        { x:(width / 2) - (textCanvas.width / 2), y: reverse? 0 - ((textCanvas.height + height)) / 2 : 0  }:
+                        { x: reverse? 0 - (textCanvas.width + (Math.abs(width - textCanvas.width) / 2)) : (width / 2) - (textCanvas.width / 2), y:  0 }: textOptions.pos  
+                        
+                    textCanvas = null // Clean up the canvas element after use
+                }
 
                 if(parent){
                     parent.onDraw(() => {
@@ -184,7 +279,8 @@ export default function ATB(k: KAPLAYCtx) {
                             direction,
                             radius,
                             reverse,
-                            outline
+                            outline,
+                            textOptions
                         )
                     })
                 }else{
@@ -203,7 +299,8 @@ export default function ATB(k: KAPLAYCtx) {
                             direction,
                             radius,
                             reverse,
-                            outline
+                            outline,
+                            textOptions
                         )
                     })
                 }
@@ -293,43 +390,11 @@ export default function ATB(k: KAPLAYCtx) {
 
                 if(options.text){
                     const text = options.text.text
-                    // Invisible canvas to measure text width
-                    // Reference: https://stackoverflow.com/a/47376591/14173422
-                    const textCanvas = document.createElement('canvas');                    
-                    if(direction === 'vertical'){
-                        textCanvas.width = 16
-                        textCanvas.height = (text.length - 1) * 16
-                        const ctx = textCanvas.getContext('2d');
-                        if(ctx){
-                            // console.log('measuring text', ctx.measureText(text).width)
-                            textCanvas.height += (ctx.measureText(text).width / 2)
-                            ctx.font = '16px monospace';
-                            ctx.fillStyle = 'white';
-                            ctx.textAlign = "center";                              
-                        }
-                        
-                        for(let i=0; i < text.length; i++){
-                            ctx?.fillText(text[i], textCanvas.width / 2, textCanvas.width + (i * 16));
-                        }
-                    }else{
-                        const ctx = textCanvas.getContext('2d');
-                        if(ctx){
-                            textCanvas.width = (text.length - 1) * 16
-                            textCanvas.height = 16
-                            ctx.font = '16px monospace';
-                            ctx.fillStyle = 'white';
-                            ctx.textAlign = "center";                              
-                            ctx.fillText(text, textCanvas.width / 2, outline?.width? textCanvas.height - outline.width : textCanvas.height - 2);
-                        }
-                    }
-
-                    const dataURL: string = textCanvas.toDataURL();
-
-                    k.loadSprite('atb-text', dataURL)
+                    let { textCanvas, name } : { textCanvas: HTMLCanvasElement | null, name: string } = prepareTextSprite(k, text, options.text.color, direction, outline?.width?? 0)
 
                     bar.add([
                         k.area(),
-                        k.sprite('atb-text'),
+                        k.sprite(name),
                         options.text.anchor === 'center'?
                             direction === 'vertical'?
                             k.pos((barWidth / 2) - (textCanvas.width / 2), reverse? 0 - ((textCanvas.height + barHeight)) / 2 : 0) :
@@ -359,7 +424,7 @@ export default function ATB(k: KAPLAYCtx) {
                     //     k.pos(0, 0)
                     // ])   
 
-                    textCanvas.remove() // Clean up the canvas element after use
+                    textCanvas = null // Clean up the canvas element after use
                 }
                 
                 const controller = k.loop(0.1, () => {
