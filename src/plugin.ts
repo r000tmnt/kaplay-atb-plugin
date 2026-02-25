@@ -10,6 +10,7 @@ export interface ATBBar {
 
 type direction = 'horizontal'|'vertical'
 type mode = 'dynamic'|'static'
+type anchor = 'start'|'center'|'end'
 
 interface customTimeController {
     paused: boolean,
@@ -38,7 +39,7 @@ interface ATBOptions{
     text?: {
         text: string,
         color?: Color,
-        anchor?: 'start'|'center'|'end'
+        anchor?: anchor
     }
 }
 
@@ -59,7 +60,7 @@ const drawStaticBar = (
     text?: {
         sprite: string,
         color: Color,
-        anchor: 'start'|'center'|'end'
+        anchor: anchor
         pos: { x: number, y: number }
     }
 ) => {
@@ -192,13 +193,16 @@ export default function ATB(k: KAPLAYCtx) {
          * @param options.wrapperColor - Color of the wrapper in rgb format (default: k.rgb(0, 0, 0))
          * @param options.barColor - Color of the ATB bar in rgb format (default: k.rgb(10, 130, 180))
          * @param options.radius - A number to set radius for the corners of the ATB bar (default: null)
-         * @param options.outline - A number to set the weight of outline (default  : null)
          * @param options.reverse - If true, the bar will fill in reverse order (default: false)
          * @param options.stay - If true, the bar will stay on the screen after filling (default: false)
          * @param options.mode - The default is dynamic. Set to static if you have no need to manipulate the bar further more. Which means the bar will render with onDraw event.
-         * @param options.text - Support TextCompOpt or DrawTextOpt from Kaplay. The minimum params as list below.
+         * @param options.outline - The outline of the bar. If set, it will create a border around the bar with the specified width and color.
+            *@param options.outline.width - The width of the outline in pixels.
+            *@param options.outline.color - The color of the outline in rgb format. If not set, it will use the wrapper color.  
+         * @param options.text - The minimum set of param to display text on the bar. It will create a sprite from the text and aligned based on the direction of the bar and the anchor point.
             * @param options.text.text - The text to display.
             * @param options.text.color - The color of the text. Default to white.
+            * @param options.text.anchor - The anchor of the text. Default to center.
          * @returns - An object containing the wrapper, bar, and controller for the ATB bar
          */
         createATB(
