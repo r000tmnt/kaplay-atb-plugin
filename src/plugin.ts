@@ -183,13 +183,13 @@ export default function ATB(k: KAPLAYCtx) {
     return {
         /**
          * Creates an ATB (Active Time Battle) bar.
-         * @param time - Number of seconds for the ATB to fill
-         * @param width - Width of the ATB bar
-         * @param height - Height of the ATB bar
-         * @param pos - Position of the ATB bar in the game world
-         * @param action - Function to call when the ATB bar is filled
+         * @param time - Number of seconds for the ATB to fill.
+         * @param width - Width of the ATB bar.
+         * @param height - Height of the ATB bar.
+         * @param pos - Position of the ATB bar in the game world.
+         * @param action - A callback function to invoke when the ATB bar is filled.
          * @param options - Optional parameters for customizing the ATB bar
-         * @param options.parent - If set, the bar will be the child of the GameObj. If the mode set to static, the bar will be draw with the onDraw event of the GameObj. 
+         * @param options.parent - The parent of ATB bar. Accepts GameObj only.   
          * @param options.wrapperColor - Color of the wrapper in rgb format (default: k.rgb(0, 0, 0))
          * @param options.barColor - Color of the ATB bar in rgb format (default: k.rgb(10, 130, 180))
          * @param options.radius - A number to set radius for the corners of the ATB bar (default: null)
@@ -212,11 +212,7 @@ export default function ATB(k: KAPLAYCtx) {
             pos: { x: number, y: number },
             action: Function,
             options: ATBOptions = {
-                radius: -1,
-                outline: {
-                    width: 0,
-                    color: undefined
-                },
+                radius: 0,
                 mode: 'dynamic'
             }
         ) {
