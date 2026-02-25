@@ -8,23 +8,34 @@ const k = kaplay({
 });
 
 const atb = k.createATB(
-    10, 
-    200, 
+    5, 
     20, 
-    { x: 100, y: 100 }, 
+    200, 
+    { x: 200, y: 100 }, 
     () => { console.log("ATB filled!") },
     {
         stay: true,
-        outline: 4,
-        radious: 10,
+        // outline: {
+        //     width: 4,
+        //     color: k.rgb(120, 0, 50)
+        // },
+        // radius: 8,
+        reverse: true,
+        text: {
+            text: "ATB",
+            // color: k.rgb(255, 255, 255),
+            anchor: 'end'
+        },
+        mode: 'static'
     }
 );
 
-atb.bar.add([
-    k.text('Flexible ATB', { size: 16, font: "monospace", width: atb.bar.width, align: 'center' }),
-])
+// atb.bar?.add([
+//     k.text('Flexible ATB', { size: 16, font: "monospace", width: atb.bar.width, align: 'center' }),
+//     k.pos(0, -atb.bar.height)
+// ])
 
-atb.wrapper.outline.color = k.color(200, 150, 200).color
+// if(atb.wrapper) atb.wrapper.outline.color = k.color(200, 150, 200).color
 
 console.log(atb)
 
