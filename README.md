@@ -3,7 +3,7 @@ A KAPLAY plugin to create active time bar!
 
 Install
 ```
-npm i kaplay-atb-plugin
+npm i kaplay-atb-plugin@0.3.0-k3001
 ```
 
 ### New features in v0.3.0_k3001
