@@ -1,6 +1,6 @@
 ### CHANGELOG
 
-## 0.3.0_k3001 (2026-02-25)
+## 0.3.0-k3001 (2026-02-25)
 * [FIX] Typo
 * [Update] Adjust position and size of inner bar
 * [Update] Change anchor position depends on direction and reverse.
