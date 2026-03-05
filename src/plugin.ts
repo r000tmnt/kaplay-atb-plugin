@@ -130,8 +130,9 @@ const drawStaticBar = (
         k.drawSprite({
             sprite: text.sprite,
             pos: k.vec2(
-                (innerBarPos.x === pos.x)? innerBarPos.x + text.pos.x : pos.x + text.pos.x, 
-                (innerBarPos.y === pos.y)? innerBarPos.y + text.pos.y : pos.y + text.pos.y),
+                pos.x + text.pos.x, 
+                pos.y + text.pos.y + (outline?.width?? 0 / 2)
+            ),
         })
     }
 
@@ -260,10 +261,10 @@ export default function ATB(k: KAPLAYCtx) {
                                 { x: (width - textCanvas.width) / 2, y: reverse? 0 : height - textCanvas.height } :
                         // Horizontal
                         textOptions.anchor === 'center'?
-                        { x: reverse? 0 - (textCanvas.width + (Math.abs(width - textCanvas.width) / 2)) : (width / 2) - (textCanvas.width / 2), y:  0 }:
+                        { x: reverse? 0 + (Math.abs(width - textCanvas.width) / 2) : (width / 2) - (textCanvas.width / 2), y:  0 }:
                         textOptions.anchor === 'start'?
-                        { x: 0, y: 0 }:
-                        { x: width - textCanvas.width, y: 0 }
+                        { x: reverse? 0 + (width - textCanvas.width) : 0, y: 0 }:
+                        { x: reverse? 0 : width - textCanvas.width, y: 0 }
 
                     textCanvas = null // Clean up the canvas element after use
                 }
