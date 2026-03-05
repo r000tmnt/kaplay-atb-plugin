@@ -1,6 +1,6 @@
 {
   "name": "kaplay-atb-plugin",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "A KAPLAY plugin to create active time bar!",
   "main": "./dist/plugin.umd.cjs",
@@ -20,7 +20,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/r000tmnt/kaplay-atb-plugin"},
+    "url": "https://github.com/r000tmnt/kaplay-atb-plugin"
+  },
   "files": [
     "dist/",
     "README.md"
