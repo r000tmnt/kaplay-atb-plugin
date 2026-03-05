@@ -3,10 +3,10 @@ A KAPLAY plugin to create active time bar!
 
 Install
 ```
-npm i kaplay-atb-plugin@0.3.0-k3001
+npm i kaplay-atb-plugin
 ```
 
-### New features in v0.3.0_k3001
+### New features in v0.3.0
 * Support vertical bars.
 * Support to display bars with onDraw event.
 * Support to create bars as child of existing GameObj.
