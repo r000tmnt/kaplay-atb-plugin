@@ -1,6 +1,6 @@
 ### CHANGELOG
 
-## 0.3.0 (2026-03-05)
+## 0.3.1 (2026-03-05)
 * [FIX] Adjust text sprite position base on direction, reverse and anchor value.
 * [Update] Smooth dynamic bar transition.
 
