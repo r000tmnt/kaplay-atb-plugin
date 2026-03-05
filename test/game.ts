@@ -15,16 +15,17 @@ const atb = k.createATB(
     () => { console.log("ATB filled!") },
     {
         stay: true,
-        // outline: {
-        //     width: 4,
-        //     color: k.rgb(120, 0, 50)
-        // },
-        // radius: 8,
+        outline: {
+            width: 4,
+            color: k.rgb(120, 0, 50)
+        },
+        radius: 8,
         reverse: true,
         text: {
             text: "ATB",
             // color: k.rgb(255, 255, 255),
             anchor: 'end'
+            // anchor: 'start'
         },
         mode: 'static'
     }
