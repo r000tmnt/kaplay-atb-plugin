@@ -130,9 +130,20 @@ const drawStaticBar = (
         k.drawSprite({
             sprite: text.sprite,
             pos: k.vec2(
-                pos.x + text.pos.x, 
-                pos.y + text.pos.y + (outline?.width?? 0 / 2)
+                direction === 'horizontal' && reverse && text.anchor === 'start' ||
+                direction === 'horizontal' && !reverse && text.anchor === 'end'?
+                    pos.x + text.pos.x - (outline?.width? outline?.width / 2 : 0) :
+                    pos.x + text.pos.x + (outline?.width && direction === 'horizontal'? outline?.width / 2 : 0),
+                direction === 'horizontal' && text.anchor !== 'center'?
+                    pos.y + text.pos.y + (outline?.width? outline?.width / 2 : 0) :
+                    pos.y + text.pos.y + (outline?.width && direction === 'vertical'? outline?.width / 2 : 0)
             ),
+            anchor: text.anchor === 'center'?
+                    'center' :
+                    reverse?
+                    direction === 'vertical'?
+                    'botleft' :
+                    'topright' : 'topleft'
         })
     }
 
@@ -162,10 +173,10 @@ const prepareTextSprite = (k: KAPLAYCtx, text: string, color: Color, direction: 
     }else{
         const ctx = textCanvas.getContext('2d');
         if(ctx){
-            textCanvas.width = text.length * 16
+            textCanvas.width = ctx.measureText(text).width * 1.6
             textCanvas.height = 16
             ctx.font = '16px monospace';
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = color.toHex();
             ctx.textAlign = "center";                              
             ctx.fillText(text, textCanvas.width / 2, outline? textCanvas.height - outline : textCanvas.height - 2);
         }
@@ -253,18 +264,16 @@ export default function ATB(k: KAPLAYCtx) {
                     let { textCanvas, name } : { textCanvas: HTMLCanvasElement | null, name: string } = prepareTextSprite(k, text.text, text.color?? k.rgb(255, 255, 255), direction, outline?.width?? 0)
                     textOptions.sprite = name
                     textOptions.pos =
-                        direction === 'vertical'?
-                            textOptions.anchor === 'center'?
-                                { x: (width - textCanvas.width) / 2, y: (height / 2) - (textCanvas.height / 2)}:
-                            textOptions.anchor === 'start'?
-                                { x: (width - textCanvas.width) / 2, y: reverse? height - textCanvas.height : 0 }:
-                                { x: (width - textCanvas.width) / 2, y: reverse? 0 : height - textCanvas.height } :
-                        // Horizontal
                         textOptions.anchor === 'center'?
-                        { x: reverse? 0 + (Math.abs(width - textCanvas.width) / 2) : (width / 2) - (textCanvas.width / 2), y:  0 }:
+                                { x: width / 2, y: height / 2}:
+                        direction === 'vertical'?
+                            textOptions.anchor === 'start'?
+                                { x: (width - textCanvas.width) / 2, y: reverse? height : 0 }:
+                                { x: (width - textCanvas.width) / 2, y: reverse? height - (height - textCanvas.height) : height - textCanvas.height } :
+                        // Horizontal
                         textOptions.anchor === 'start'?
-                        { x: reverse? 0 + (width - textCanvas.width) : 0, y: 0 }:
-                        { x: reverse? 0 : width - textCanvas.width, y: 0 }
+                        { x: reverse? width : 0, y: 0 }:
+                        { x: reverse? 0 + textCanvas.width : width - textCanvas.width, y: 0 }
 
                     textCanvas = null // Clean up the canvas element after use
                 }
@@ -343,7 +352,7 @@ export default function ATB(k: KAPLAYCtx) {
                     }
                 } as ATBBar;   
             }else{
-                time = time * 10
+                // time = time * 10
 
                 let wrapper: GameObj
 
@@ -398,7 +407,9 @@ export default function ATB(k: KAPLAYCtx) {
 
                 const bar = wrapper.add([
                     k.area(),
-                    k.rect(barWidth, barHeight),
+                    k.rect(
+                        direction === 'vertical'? barWidth : 0, 
+                        direction === 'horizontal'? barHeight : 0),
                     k.pos(barPos.x, barPos.y),       
                     k.color(bColor),
                     direction === 'vertical'? 
@@ -463,16 +474,16 @@ export default function ATB(k: KAPLAYCtx) {
                     textCanvas = null // Clean up the canvas element after use
                 }
                 
-                const controller = k.loop(0.1, () => {
+                const controller = k.loop(1, () => {
                     const add = Math.floor(100/time)
                     percentage = (percentage + add > 100)? 100 : percentage + add
 
                     if(direction === 'vertical'){
                         const newHeight =  barHeight * (percentage/100)
-                        k.tween(bar.height, newHeight, 0, (p) => bar.height = p, k.easings.linear)
+                        k.tween(bar.height, newHeight, 1, (p) => bar.height = p, k.easings.linear)
                     }else{
                         const newWidth =  barWidth * (percentage/100)
-                        k.tween(bar.width, newWidth, 0, (p) => bar.width = p, k.easings.linear)
+                        k.tween(bar.width, newWidth, 1, (p) => bar.width = p, k.easings.linear)
                     }
                 }, time)
                     
