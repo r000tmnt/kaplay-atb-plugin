@@ -1,5 +1,10 @@
 ### CHANGELOG
 
+## 0.3.2 (2026-03-06)
+* [FIX] No need to destroy bar since it is a child of wrapper.
+* [Update] Prolong loop times.
+* [Update] Jump to 100 if percentage divide by add equals to times.
+
 ## 0.3.1 (2026-03-05)
 * [FIX] Adjust text sprite position base on direction, reverse and anchor value.
 * [Update] Smooth dynamic bar transition.
