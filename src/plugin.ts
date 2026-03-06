@@ -1,9 +1,9 @@
-import type { GameObj, TimerController, KAPLAYCtx, Color, Vec2, KEventController } from "kaplay";
+import type { GameObj, KAPLAYCtx, Color, Vec2, KEventController, TweenController } from "kaplay";
 
 export interface ATBBar {
     wrapper: GameObj | null;
     bar: GameObj | null;
-    controller: TimerController | customTimeController;
+    controller: TweenController | customTimeController;
     pause: Function;
     remove: Function;
 }
@@ -475,21 +475,14 @@ export default function ATB(k: KAPLAYCtx) {
                 }
 
                 // k.debug.log('begin')
-                
-                const controller = k.loop(1, () => {
-                    const add = Math.floor(100/time)
-                    percentage = ((percentage / add) === time)? 100 : percentage + add
 
-                    // console.log(percentage)
+                let controller : TweenController
 
-                    if(direction === 'vertical'){
-                        const newHeight =  barHeight * (percentage/100)
-                        k.tween(bar.height, newHeight, 1, (p) => bar.height = p, k.easings.linear)
-                    }else{
-                        const newWidth =  barWidth * (percentage/100)
-                        k.tween(bar.width, newWidth, 1, (p) => bar.width = p, k.easings.linear)
-                    }
-                }, time + 1)
+                if(direction === 'vertical'){
+                    controller = k.tween(bar.height, barHeight, time, (p) => bar.height = p, k.easings.linear)
+                }else{
+                    controller = k.tween(bar.width, barWidth, time, (p) => bar.width = p, k.easings.linear)
+                }                
                     
                 controller.onEnd(() => {
                     // k.debug.log('end')

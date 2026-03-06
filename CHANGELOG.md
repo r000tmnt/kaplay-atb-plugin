@@ -2,8 +2,7 @@
 
 ## 0.3.2 (2026-03-06)
 * [FIX] No need to destroy bar since it is a child of wrapper.
-* [Update] Prolong loop times.
-* [Update] Jump to 100 if percentage divide by add equals to times.
+* [Update] Simplify the steps. Replace loop with tween for dynamic bar.
 
 ## 0.3.1 (2026-03-05)
 * [FIX] Adjust text sprite position base on direction, reverse and anchor value.
