@@ -473,10 +473,14 @@ export default function ATB(k: KAPLAYCtx) {
 
                     textCanvas = null // Clean up the canvas element after use
                 }
+
+                // k.debug.log('begin')
                 
                 const controller = k.loop(1, () => {
                     const add = Math.floor(100/time)
-                    percentage = (percentage + add > 100)? 100 : percentage + add
+                    percentage = ((percentage / add) === time)? 100 : percentage + add
+
+                    // console.log(percentage)
 
                     if(direction === 'vertical'){
                         const newHeight =  barHeight * (percentage/100)
@@ -485,13 +489,13 @@ export default function ATB(k: KAPLAYCtx) {
                         const newWidth =  barWidth * (percentage/100)
                         k.tween(bar.width, newWidth, 1, (p) => bar.width = p, k.easings.linear)
                     }
-                }, time)
+                }, time + 1)
                     
                 controller.onEnd(() => {
+                    // k.debug.log('end')
                     action()
                     if(!stay){
-                        wrapper.destroy()
-                        bar.destroy()                    
+                        wrapper.destroy()                   
                     }
                 }) 
 
